@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.dao.UserGroupMapper" >
+  <resultMap id="BaseResultMap" type="com.vo.UserGroup" >
+    <id column="group_id" property="groupId" jdbcType="INTEGER" />
+    <result column="group_name" property="groupName" jdbcType="VARCHAR" />
+    <result column="group_code" property="groupCode" jdbcType="VARCHAR" />
+    <result column="group_desc" property="groupDesc" jdbcType="VARCHAR" />
+    <result column="group_state" property="groupState" jdbcType="CHAR" />
+  </resultMap>
+  <!-- 查询用户组 -->
+  <select id="findGroup" resultMap="BaseResultMap" parameterType="HashMap">
+  	select * from user_group 
+  	<where>
+  		<if test="group.groupId!=null">
+	  	  	and group_id=#{group.groupId}
+	  	</if>
+	  	<if test="group.groupName!=null and group.groupName!=''">
+	  	  	and group_name like concat('%',#{group.groupName},'%')
+	  	</if>
+	  	<if test="group.groupState!=null and group.groupState!=''">
+	  	  	and group_state=#{group.groupState}
+	  	</if>
+  	</where>
+	  	<if test="page!=null">
+			limit #{page.limitIndex},#{page.pageSize}
+		</if>
+  </select>
+  <!-- 添加 -->
+  <insert id="insertGroup" parameterType="com.vo.UserGroup" >
+    insert into user_group
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="groupName != null" >
+        group_name,
+      </if>
+      <if test="groupCode != null" >
+        group_code,
+      </if>
+      <if test="groupDesc != null" >
+        group_desc,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="groupName != null" >
+        #{groupName,jdbcType=VARCHAR},
+      </if>
+      <if test="groupCode != null" >
+        #{groupCode,jdbcType=VARCHAR},
+      </if>
+      <if test="groupDesc != null" >
+        #{groupDesc,jdbcType=VARCHAR},
+      </if>
+    </trim>
+  </insert>
+  <!-- 修改 -->
+  <update id="updateGroup" parameterType="com.vo.UserGroup" >
+    update user_group
+    <set >
+      <if test="groupCode != null" >
+        group_code = #{groupCode,jdbcType=VARCHAR},
+      </if>
+      <if test="groupDesc != null" >
+        group_desc = #{groupDesc,jdbcType=VARCHAR},
+      </if>
+      <if test="groupState != null" >
+        group_state = #{groupState,jdbcType=CHAR},
+      </if>
+    </set>
+    where group_id = #{groupId,jdbcType=INTEGER}
+  </update>
+  <!-- 删除 -->
+  <delete id="deleteGroup" parameterType="java.lang.Integer" >
+    delete from user_group
+    where group_id = #{groupId,jdbcType=INTEGER}
+  </delete>
+  <resultMap id="findGroupRole" type="com.vo.GroupRole" >
+    <id column="goup_role_id" property="goupRoleId" jdbcType="INTEGER" />
+    <result column="group_id" property="groupId" jdbcType="INTEGER" />
+    <result column="role_id" property="roleId" jdbcType="INTEGER" />
+  </resultMap>
+  <!-- 查询用户组角色 -->
+  <select id="findGroupRole" parameterType="com.vo.GroupRole" resultMap="findGroupRole" >
+    select * from group_role
+    <where>
+	    <if test="groupId!=null" >
+	      and group_id=#{groupId}
+	    </if>
+    </where>
+  </select>
+  <!-- 添加 -->
+  <insert id="insertGroupRole" parameterType="com.vo.GroupRole" >
+    insert into group_role
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="groupId != null" >
+        group_id,
+      </if>
+      <if test="roleId != null" >
+        role_id,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="groupId != null" >
+        #{groupId,jdbcType=INTEGER},
+      </if>
+      <if test="roleId != null" >
+        #{roleId,jdbcType=INTEGER},
+      </if>
+    </trim>
+  </insert>
+  <!-- 删除 -->
+  <delete id="deleteGroupRole" parameterType="com.vo.GroupRole" >
+    delete from group_role
+    <where>
+	    <if test="groupId!=null" >
+	      and group_id=#{groupId}
+	    </if>
+    </where>
+  </delete>
+</mapper>

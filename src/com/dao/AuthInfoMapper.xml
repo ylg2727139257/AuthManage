@@ -1,0 +1,168 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.dao.AuthInfoMapper" >
+  <resultMap id="BaseResultMap" type="com.vo.AuthInfo" >
+    <id column="auth_id" property="authId" jdbcType="INTEGER" />
+    <result column="parent_id" property="parentId" jdbcType="INTEGER" />
+    <result column="auth_name" property="authName" jdbcType="VARCHAR" />
+    <result column="auth_desc" property="authDesc" jdbcType="VARCHAR" />
+    <result column="auth_grade" property="authGrade" jdbcType="INTEGER" />
+    <result column="auth_type" property="authType" jdbcType="CHAR" />
+    <result column="auth_url" property="authUrl" jdbcType="VARCHAR" />
+    <result column="auth_code" property="authCode" jdbcType="VARCHAR" />
+    <result column="auth_order" property="authOrder" jdbcType="INTEGER" />
+    <result column="auth_state" property="authState" jdbcType="CHAR" />
+    <result column="create_by" property="createBy" jdbcType="INTEGER" />
+    <result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
+    <result column="update_by" property="updateBy" jdbcType="INTEGER" />
+    <result column="update_time" property="updateTime" jdbcType="TIMESTAMP" />
+  </resultMap>
+  <!-- 查询权限 -->
+  <select id="findAuth" parameterType="com.vo.AuthInfo" resultMap="BaseResultMap">
+  	select * from auth_info 
+  	<where>
+  		<if test="authId!=null and authId!=''">
+  			and auth_id=#{authId}
+  		</if>
+  		<if test="authName!=null and authName!=''">
+  			and auth_name=#{authName}
+  		</if>
+  		<if test="authCode!=null and authCode!=''">
+  			and auth_code=#{authCode}
+  		</if>
+  		<if test="authUrl!=null and authUrl!=''">
+  			and auth_url=#{authUrl}
+  		</if>
+  		<if test="authState!=null and authState!=''">
+  			and auth_state=#{authState}
+  		</if>
+  	</where>
+  </select>
+  <!-- 查询所有权限 -->
+  <select id="findAuthToIndex" parameterType="HashMap" resultMap="BaseResultMap">
+  	SELECT * FROM auth_info WHERE auth_id IN
+		(SELECT ua.`auth_id` FROM user_info ui,user_auth ua 
+		WHERE ui.`user_id`=ua.`user_id` AND ui.`user_state`=1 AND ui.`is_delete`=0
+		AND ui.`user_id`=#{userId})
+		AND auth_state=1 AND parent_id=#{authId}
+	UNION
+	SELECT * FROM auth_info WHERE auth_id IN
+		(SELECT auth_id FROM role_auth WHERE role_id IN
+		(SELECT ur.role_id FROM user_role ur,role r,user_info ui 
+		WHERE ur.role_id=r.role_id AND ui.user_id=ur.user_id
+		AND r.role_state=1 AND ui.user_id=#{userId}))
+		AND auth_state=1 AND parent_id=#{authId}
+	UNION
+	SELECT * FROM auth_info WHERE auth_id IN
+		(SELECT auth_id FROM role_auth WHERE role_id IN
+		(SELECT gr.role_id FROM group_role gr,role r 
+		WHERE gr.role_id=r.role_id AND r.`role_state`=1 AND 
+		 gr.group_id IN
+		(SELECT ui.group_id FROM user_info ui,user_group ug
+		WHERE ui.`group_id`=ug.group_id AND ug.group_state=1
+		AND ui.group_id=#{groupId})))
+		AND auth_state=1 AND parent_id=#{authId}
+  </select>
+  <!-- 修改 -->
+  <update id="updateAuth" parameterType="com.vo.AuthInfo" >
+    update auth_info
+    <set>
+      <if test="authName != null" >
+        auth_name = #{authName,jdbcType=VARCHAR},
+      </if>
+      <if test="authDesc != null" >
+        auth_desc = #{authDesc,jdbcType=VARCHAR},
+      </if>
+      <if test="authState != null" >
+        auth_state = #{authState,jdbcType=CHAR},
+      </if>
+      <if test="updateBy != null" >
+        update_by = #{updateBy,jdbcType=INTEGER},
+      </if>
+      <if test="updateTime != null" >
+        update_time = #{updateTime,jdbcType=TIMESTAMP},
+      </if>
+    </set>
+    where auth_id = #{authId,jdbcType=INTEGER}
+	 or parent_id = #{authId,jdbcType=INTEGER}  
+  </update>
+ <!--  添加 -->
+  <insert id="addAuth" parameterType="com.vo.AuthInfo" >
+    insert into auth_info
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="parentId != null" >
+        parent_id,
+      </if>
+      <if test="authName != null" >
+        auth_name,
+      </if>
+      <if test="authDesc != null" >
+        auth_desc,
+      </if>
+      <if test="authGrade != null" >
+        auth_grade,
+      </if>
+      <if test="authType != null" >
+        auth_type,
+      </if>
+      <if test="authUrl != null" >
+        auth_url,
+      </if>
+      <if test="authCode != null" >
+        auth_code,
+      </if>
+      <if test="createBy != null" >
+        create_by,
+      </if>
+      <if test="createTime != null" >
+        create_time,
+      </if>
+      <if test="updateBy != null" >
+        update_by,
+      </if>
+      <if test="updateTime != null" >
+        update_time,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="parentId != null" >
+        #{parentId,jdbcType=INTEGER},
+      </if>
+      <if test="authName != null" >
+        #{authName,jdbcType=VARCHAR},
+      </if>
+      <if test="authDesc != null" >
+        #{authDesc,jdbcType=VARCHAR},
+      </if>
+      <if test="authGrade != null" >
+        #{authGrade,jdbcType=INTEGER},
+      </if>
+      <if test="authType != null" >
+        #{authType,jdbcType=CHAR},
+      </if>
+      <if test="authUrl != null" >
+        #{authUrl,jdbcType=VARCHAR},
+      </if>
+      <if test="authCode != null" >
+        #{authCode,jdbcType=VARCHAR},
+      </if>
+      <if test="createBy != null" >
+        #{createBy,jdbcType=INTEGER},
+      </if>
+      <if test="createTime != null" >
+        #{createTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="updateBy != null" >
+        #{updateBy,jdbcType=INTEGER},
+      </if>
+      <if test="updateTime != null" >
+        #{updateTime,jdbcType=TIMESTAMP},
+      </if>
+    </trim>
+  </insert>
+  <!-- 删除 -->
+  <delete id="deleteAuth" parameterType="AuthInfo" >
+    delete from auth_info where auth_id = #{authId,jdbcType=INTEGER} 
+     or parent_id = #{authId,jdbcType=INTEGER}
+  </delete>
+</mapper>

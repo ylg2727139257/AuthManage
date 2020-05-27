@@ -1,0 +1,194 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.dao.RoleMapper" >
+  <resultMap id="BaseResultMap" type="com.vo.Role" >
+    <id column="role_id" property="roleId" jdbcType="INTEGER" />
+    <result column="role_name" property="roleName" jdbcType="VARCHAR" />
+    <result column="role_desc" property="roleDesc" jdbcType="VARCHAR" />
+    <result column="role_code" property="roleCode" jdbcType="VARCHAR" />
+    <result column="role_state" property="roleState" jdbcType="CHAR" />
+    <result column="create_by" property="createBy" jdbcType="INTEGER" />
+    <result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
+    <result column="update_by" property="updateBy" jdbcType="INTEGER" />
+    <result column="update_time" property="updateTime" jdbcType="TIMESTAMP" />
+  </resultMap>
+  <!-- 查询角色 -->
+  <select id="findRole" resultMap="BaseResultMap">
+  	select * from role 
+  	<where>
+	  	<if test="roleId!=null and roleId!=''">
+	  	  	and role_id=#{roleId}
+	  	</if>
+	  	<if test="roleName!=null and roleName!=''">
+	  	  	and role_name=#{roleName}
+	  	</if>
+	  	<if test="roleState!=null and roleState!=''">
+	  	  	and role_state=#{roleState}
+	  	</if>
+  	</where>
+  </select>
+ <resultMap id="findRoleList" type="com.vo.Role" >
+    <id column="role_id" property="roleId" jdbcType="INTEGER" />
+    <result column="role_name" property="roleName" jdbcType="VARCHAR" />
+    <result column="role_desc" property="roleDesc" jdbcType="VARCHAR" />
+    <result column="role_code" property="roleCode" jdbcType="VARCHAR" />
+    <result column="role_state" property="roleState" jdbcType="CHAR" />
+    <result column="create_by" property="createBy" jdbcType="INTEGER" />
+    <result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
+    <result column="update_by" property="updateBy" jdbcType="INTEGER" />
+    <result column="update_time" property="updateTime" jdbcType="TIMESTAMP" />
+    <association property="userInfo" javaType="UserInfo">
+	  <id column="user_id" property="userId" jdbcType="INTEGER" />
+	  <result column="group_id" property="groupId" jdbcType="INTEGER" />
+	  <result column="nick_name" property="nickName" jdbcType="VARCHAR" />
+	  <result column="user_code" property="userCode" jdbcType="VARCHAR" />
+	  <result column="user_pwd" property="userPwd" jdbcType="VARCHAR" />
+	  <result column="user_type" property="userType" jdbcType="CHAR" />
+	  <result column="user_state" property="userState" jdbcType="CHAR" />
+	  <result column="is_delete" property="isDelete" jdbcType="CHAR" />
+	  <result column="create_by" property="createBy" jdbcType="INTEGER" />
+	  <result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
+	  <result column="update_by" property="updateBy" jdbcType="INTEGER" />
+	  <result column="update_time" property="updateTime" jdbcType="TIMESTAMP" />
+    </association>
+  </resultMap>
+  <!-- 查询角色，用户 -->
+  <select id="findRoleList" parameterType="HashMap" resultMap="findRoleList" >
+  	select ui.*,r.* from user_info ui,role r
+  	<where>
+  		and ui.user_id=r.create_by
+		<if test="role.roleName!=null and role.roleName!=''">
+			and r.role_name like concat('%',#{role.roleName},'%') 
+		</if>
+		<if test="role.roleState!=null and role.roleState!=''">
+			and r.role_state = #{role.roleState}
+		</if> 
+  	</where>
+		<if test="page!=null">
+			limit #{page.limitIndex},#{page.pageSize}
+		</if>
+  </select>
+  <!-- 添加 -->
+  <insert id="insertRole" parameterType="com.vo.Role" >
+    insert into role
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="roleName != null and roleName!=''" >
+        role_name,
+      </if>
+      <if test="roleDesc != null and roleDesc!=''" >
+        role_desc,
+      </if>
+      <if test="roleCode != null and roleCode!=''" >
+        role_code,
+      </if>
+      <if test="createBy != null" >
+        create_by,
+      </if>
+      <if test="createTime != null" >
+        create_time,
+      </if>
+      <if test="updateBy != null" >
+        update_by,
+      </if>
+      <if test="updateTime != null" >
+        update_time,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="roleName != null and roleName!=''" >
+        #{roleName,jdbcType=VARCHAR},
+      </if>
+      <if test="roleDesc != null and roleDesc !=''" >
+        #{roleDesc,jdbcType=VARCHAR},
+      </if>
+      <if test="roleCode != null and roleCode !=''" >
+        #{roleCode,jdbcType=VARCHAR},
+      </if>
+      <if test="createBy != null" >
+        #{createBy,jdbcType=INTEGER},
+      </if>
+      <if test="createTime != null" >
+        #{createTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="updateBy != null" >
+        #{updateBy,jdbcType=INTEGER},
+      </if>
+      <if test="updateTime != null" >
+        #{updateTime,jdbcType=TIMESTAMP},
+      </if>
+    </trim>
+  </insert>
+  <!-- 修改 -->
+  <update id="updateRole" parameterType="com.vo.Role" >
+    update role
+    <set >
+      <if test="roleDesc != null and roleDesc !=''" >
+        role_desc = #{roleDesc,jdbcType=VARCHAR},
+      </if>
+      <if test="roleCode != null and roleCode !=''" >
+        role_code = #{roleCode,jdbcType=VARCHAR},
+      </if>
+      <if test="roleState != null" >
+        role_state = #{roleState,jdbcType=CHAR},
+      </if>
+      <if test="updateBy != null" >
+        update_by = #{updateBy,jdbcType=INTEGER},
+      </if>
+      <if test="updateTime != null" >
+        update_time = #{updateTime,jdbcType=TIMESTAMP},
+      </if>
+    </set>
+    where role_id=#{roleId,jdbcType=INTEGER}
+  </update>
+  <!-- 删除 -->
+  <delete id="deleteRole" parameterType="java.lang.Integer" >
+    delete from role
+    where role_id = #{roleId,jdbcType=INTEGER}
+  </delete>
+  <resultMap id="findRoleAuth" type="com.vo.RoleAuth" >
+    <id column="role_auth_id" property="roleAuthId" jdbcType="INTEGER" />
+    <result column="role_id" property="roleId" jdbcType="INTEGER" />
+    <result column="auth_id" property="authId" jdbcType="INTEGER" />
+  </resultMap>
+  <!-- 查询角色权限 -->
+  <select id="findRoleAuth" parameterType="com.vo.RoleAuth" resultMap="findRoleAuth">
+  	select * from role_auth
+  	<where>
+  		<if test="roleId!=null">
+  			and role_id=#{roleId}
+  		</if>
+  	</where>
+  </select>
+  <!-- 删除 -->
+  <delete id="deleteRoleAuth" parameterType="com.vo.RoleAuth">
+  	delete from role_auth
+  	<where>
+  		<if test="roleId!=null">
+  			and role_id=#{roleId}
+  		</if>
+  	</where>
+  </delete>
+  <!-- 添加 -->
+  <insert id="insertRoleAuth" parameterType="com.vo.RoleAuth">
+  	insert into role_auth
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="authId != null" >
+        auth_id,
+      </if>
+      <if test="roleId != null" >
+        role_id,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="authId != null" >
+        #{authId,jdbcType=INTEGER},
+      </if>
+      <if test="roleId != null" >
+        #{roleId,jdbcType=INTEGER},
+      </if>
+    </trim>
+  </insert>
+  
+  
+  
+</mapper>
